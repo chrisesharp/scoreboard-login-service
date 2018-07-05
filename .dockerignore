@@ -1,4 +1,5 @@
 #Ignore Liberty server files
+*/server.env
 target/liberty/wlp/usr/servers/defaultServer/logs
 target/liberty/wlp/usr/servers/defaultServer/workarea
 target/liberty/wlp/usr/servers/defaultServer/.classCache

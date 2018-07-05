@@ -22,47 +22,49 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
+import java.io.InputStream;
+import java.io.ByteArrayInputStream;
+import java.net.URI;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.http.NameValuePair;
 import org.apache.http.client.utils.URLEncodedUtils;
-//import org.gameontext.auth.JwtAuth;
-//import org.gameontext.auth.Log;
-
-//import com.fasterxml.jackson.databind.JsonNode;
-//import com.fasterxml.jackson.databind.ObjectMapper;
+import javax.json.JsonReader;
+import javax.json.JsonObject;
+import javax.json.JsonArray;
+import javax.json.Json;
 import com.google.api.client.http.GenericUrl;
 import com.google.api.client.http.HttpRequest;
 import com.google.api.client.http.HttpRequestFactory;
 import com.google.api.client.http.HttpResponse;
 import com.google.api.client.http.javanet.NetHttpTransport;
+import application.auth.JwtAuth;
 
 /**
  * Servlet implementation class googleCallback
  */
 @WebServlet("/callback")
-public class GitHubCallback extends HttpServlet {
+public class GitHubCallback extends JwtAuth {
     private static final long serialVersionUID = 1L;
 
     @Resource(lookup = "gitHubOAuthKey")
     private String key;
     @Resource(lookup = "gitHubOAuthSecret")
-    String secret;
+    private String secret;
     
     @Resource(lookup = "authCallbackURLSuccess")
     String callbackSuccess;
     @Resource(lookup = "authCallbackURLFailure")
     String callbackFailure;
     
-    //@Resource(lookup = "authURL")
-    private String authURL = "http://localhost:9080/login/callback";
+    @Resource(lookup = "authURL")
+    private String authURL;
 
     public GitHubCallback() {
         super();
@@ -85,7 +87,7 @@ public class GitHubCallback extends HttpServlet {
         String state = (String) request.getSession().getAttribute("github");
 
         //now we need to invoke the access_token endpoint to swap the code for a token.
-        String callbackURL = authURL + "/GitHubCallback";
+        String callbackURL = authURL + "/callback";
 
         HttpRequestFactory requestFactory;
         try {
@@ -105,15 +107,13 @@ public class GitHubCallback extends HttpServlet {
 
             //now place the request to github..
             HttpRequest infoRequest = requestFactory.buildGetRequest(url);
-            HttpResponse r = infoRequest.execute();
-            String resp = "failed.";
-            if(r.isSuccessStatusCode()){
-
-                //response comes back as query param encoded data.. we'll grab the token from that...
-                resp = r.parseAsString();
+            HttpResponse httpResponse = infoRequest.execute();
+            String responseString = "failed.";
+            if(httpResponse.isSuccessStatusCode()){
 
                 //http client way to parse query params..
-                List<NameValuePair> params = URLEncodedUtils.parse(resp, Charset.forName("UTF-8"));
+                //List<NameValuePair> params = URLEncodedUtils.parse(responseString, Charset.forName("UTF-8"));
+                List<NameValuePair> params = URLEncodedUtils.parse(httpResponse.parseAsString(), Charset.forName("UTF-8"));
                 String token = null;
                 for(NameValuePair param : params){
                     if("access_token".equals(param.getName())){
@@ -130,17 +130,20 @@ public class GitHubCallback extends HttpServlet {
                     HttpResponse u = userRequest.execute();
                     if(u.isSuccessStatusCode()){
                         //user profile comes back as json..
-                        resp = u.parseAsString();
+                        responseString = u.parseAsString();
 
-                        //use om to parse the json, so we can grab the id & name from it.
-                        ObjectMapper om = new ObjectMapper();
-                        JsonNode jn = om.readValue(resp,JsonNode.class);
+                        JsonReader jsonReader = Json.createReader(
+                            new ByteArrayInputStream(responseString.getBytes())
+                          );
+                        JsonObject jsonResponse = jsonReader.readObject();
+                        jsonReader.close();
+
 
                         Map<String, String> claims = new HashMap<String,String>();
                         claims.put("valid", "true");
                         //github id is a number, but we'll read it as text incase it changes in future..
-                        claims.put("id", "github:" + jn.get("id").asText());
-                        claims.put("name", jn.get("login").textValue());
+                        claims.put("id", "github:" + jsonResponse.getString("id"));
+                        claims.put("name", jsonResponse.getString("login"));
 
                         GenericUrl emailQuery = new GenericUrl("https://api.github.com/user/emails");
                         emailQuery.put("access_token", token);
@@ -149,13 +152,19 @@ public class GitHubCallback extends HttpServlet {
 
                         claims.put("email","unknown");
                         if(er.isSuccessStatusCode()){
-                          resp = er.parseAsString();
-                          JsonNode en = om.readValue(resp,JsonNode.class);
-                          if(en.isArray()){
-                            for ( JsonNode email : en) {
-                              Boolean primary = Boolean.valueOf(email.get("primary").booleanValue());
+                          responseString = er.parseAsString();
+                          jsonReader = Json.createReader(
+                              new ByteArrayInputStream(responseString.getBytes())
+                            );
+                          JsonArray jsonResponseArray = jsonReader.readArray();
+                          jsonReader.close();
+                          if(jsonResponseArray != null){
+                            int arraySize = jsonResponseArray.size();
+                            for ( int i = 0; i < arraySize; i++) {
+                              JsonObject email = jsonResponseArray.getJsonObject(i);
+                              Boolean primary = Boolean.valueOf(email.getBoolean("primary"));
                               if(primary){
-                                claims.put("email", email.get("email").textValue());
+                                claims.put("email", email.getString("email"));
                               }
                             }
                           }
@@ -172,7 +181,7 @@ public class GitHubCallback extends HttpServlet {
                         response.sendRedirect(callbackFailure);
                     }
                 }else{
-                    System.out.println("did not find token in github response "+resp);
+                    System.out.println("did not find token in github response "+responseString);
                     response.sendRedirect(callbackFailure);
                 }
             }else{

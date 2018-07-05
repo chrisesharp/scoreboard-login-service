@@ -9,7 +9,12 @@
 
   <httpEndpoint httpPort="${default.http.port}" httpsPort="${default.https.port}"
       id="defaultHttpEndpoint" host="*" />
-
+      
+      
+  <!-- Github Application Info...  -->
+    <jndiEntry jndiName="gitHubOAuthKey" value="${env.GITHUB_APP_ID}"/>
+    <jndiEntry jndiName="gitHubOAuthSecret" value="${env.GITHUB_APP_SECRET}"/>
+    <jndiEntry jndiName="authURL" value="${env.AUTH_URL}"/>
 
 
   <!-- Automatically expand WAR files and EAR files -->

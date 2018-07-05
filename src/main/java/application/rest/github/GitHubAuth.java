@@ -31,8 +31,8 @@ public class GitHubAuth extends HttpServlet {
 
     @Resource(lookup = "gitHubOAuthKey")
     private String key;
-    //@Resource(lookup = "authURL")
-    private String authURL = "http://localhost:9080/login/callback";
+    @Resource(lookup = "authURL")
+    private String authURL;
 
     private final static String url = "https://github.com/login/oauth/authorize";
 
@@ -46,7 +46,7 @@ public class GitHubAuth extends HttpServlet {
 
             // GitHub will tell the users browser to go to this address once
             // they are done authing.
-            String callbackURL = authURL;
+            String callbackURL = authURL + "/callback";
 
             String newUrl = url + "?client_id="+key+"&redirect_url="+callbackURL+"&scope=user:email&state="+state;
             System.out.println("GitHub Auth with callback:" + newUrl);

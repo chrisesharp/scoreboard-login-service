@@ -5,10 +5,16 @@
   <title>Scoreboard Login Service</title>
 </head>
 <body ng-controller="appControl">
-  <h1>Scoreboar Login Service</h1>
+  <h1>Scoreboard Login Service</h1>
+  <!--
+
   <button ng-click="startlogin()" role="button">
     Click here to log into GitHub
   </button>
+-->
+<form action="/GitHubAuth">
+  <input type="submit" value="Login to GitHub"/>
+</form>
   
   <script type="text/javascript"
     src="https://ajax.googleapis.com/ajax/libs/angularjs/1.6.4/angular.min.js">
