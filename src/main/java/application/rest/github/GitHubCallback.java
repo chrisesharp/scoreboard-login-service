@@ -22,9 +22,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.logging.Level;
-import java.io.InputStream;
 import java.io.ByteArrayInputStream;
-import java.net.URI;
+
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
@@ -81,6 +80,7 @@ public class GitHubCallback extends JwtAuth {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
+        System.setProperty("https.protocols", "TLSv1");
         //ok, we have our code.. so the user has agreed to our app being authed.
         String code = request.getParameter("code");
 
