@@ -23,8 +23,11 @@ import java.security.KeyStoreException;
 import java.security.NoSuchAlgorithmException;
 import java.security.UnrecoverableKeyException;
 import java.security.cert.CertificateException;
+
 import java.util.Calendar;
 import java.util.Map;
+import java.util.Set;
+import java.util.HashSet;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServlet;
@@ -117,6 +120,9 @@ public abstract class JwtAuth extends HttpServlet {
         Calendar calendar2 = Calendar.getInstance();
         calendar2.add(Calendar.HOUR, 24);
         onwardsClaims.setExpiration(calendar2.getTime());
+        Set<String> groups = new HashSet<String>();
+        groups.add("user");
+        onwardsClaims.put("groups",groups);
 
         // finally build the new jwt, using the claims we just built, signing it
         // with our
