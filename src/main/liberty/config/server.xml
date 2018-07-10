@@ -9,11 +9,11 @@
       <feature>mpJwt-1.0</feature>
       <feature>jsonp-1.0</feature>
   </featureManager>
-  
+  <!--
     <keyStore id="defaultKeyStore" location="key.jks"  password="keystore"/>
 
     <keyStore id="defaultTrustStore" location="truststore.jks" password="truststore"/>
-
+-->
   <sslDefault sslRef="DefaultSSLSettings"/>
   <ssl id="DefaultSSLSettings"
     keyStoreRef="defaultKeyStore" 
@@ -36,7 +36,7 @@
     password="secret" />
   -->
   <!-- Signed JWT keystore info -->
-    <jndiEntry jndiName="jwtKeyStore" value="${server.config.dir}/resources/security/key.jks"/>
+    <jndiEntry jndiName="jwtKeyStore" value="${server.output.dir}/resources/security/keystore.jks"/>
 <!--
     <jndiEntry jndiName="jwtKeyStore" value="${server.config.dir}/resources/security/keystore.jceks"/>
 -->

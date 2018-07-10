@@ -80,7 +80,6 @@ public class GitHubCallback extends JwtAuth {
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
-        System.setProperty("https.protocols", "TLSv1");
         //ok, we have our code.. so the user has agreed to our app being authed.
         String code = request.getParameter("code");
 
@@ -142,8 +141,8 @@ public class GitHubCallback extends JwtAuth {
                         Map<String, String> claims = new HashMap<String,String>();
                         claims.put("valid", "true");
                         //github id is a number, but we'll read it as text incase it changes in future..
-                        claims.put("id", "github:" + jsonResponse.getString("id"));
-                        claims.put("name", jsonResponse.getString("login"));
+                        claims.put("id", "github:" + jsonResponse.get("id").toString());
+                        claims.put("name", jsonResponse.get("login").toString());
 
                         GenericUrl emailQuery = new GenericUrl("https://api.github.com/user/emails");
                         emailQuery.put("access_token", token);

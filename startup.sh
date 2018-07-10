@@ -2,8 +2,7 @@
 
 export CONTAINER_NAME=auth
 
-SERVER_PATH=/opt/ibm/wlp/output/defaultServer/
-
+SERVER_PATH=/opt/ol/wlp/output/defaultServer
 echo "Building keystore/truststore from cert.pem"
 echo "-creating dir"
 mkdir -p ${SERVER_PATH}/resources/security
@@ -26,4 +25,6 @@ if [ -f /etc/cert/cert.pem ]; then
   cd ${SERVER_PATH}
   echo "done"
 fi
+
+exec /opt/ol/wlp/bin/server run defaultServer
 

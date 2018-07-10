@@ -114,6 +114,21 @@
             <artifactId>httpclient</artifactId>
             <version>4.5.2</version>
         </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-core</artifactId>
+            <version>2.4.1</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>2.4.1</version>
+        </dependency>
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-annotations</artifactId>
+            <version>2.4.1</version>
+        </dependency>
     </dependencies>
 
     <build>
@@ -153,9 +168,9 @@
                 </executions>
                 <!-- Global configuration for the keytool plugin -->
                 <configuration>
-                    <keystore>${basedir}/src/main/resources/keystore.jceks</keystore>
+                    <keystore>${basedir}/src/main/liberty/config/security/keystore.jks</keystore>
                     <storepass>secret</storepass>
-                    <storetype>jceks</storetype>
+                    <storetype>jks</storetype>
                 </configuration>
             </plugin>
             <plugin>
@@ -176,7 +191,7 @@
                                 <resource>
                                     <directory>${project.build.directory}/liberty/wlp/usr/servers/defaultServer/resources/security</directory>
                                     <includes>
-                                        <include>keystore.jceks</include>
+                                        <include>keystore.jks</include>
                                     </includes>
                                 </resource>
                             </resources>

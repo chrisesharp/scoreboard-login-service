@@ -2,7 +2,7 @@
 /mc-target
 /.m2
 /load-test/*/
-
+/src/main/liberty/config/security/keystore.jks
 
 /.classpath
 /.project

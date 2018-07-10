@@ -30,6 +30,12 @@ coverage:
 .PHONY: run
 run:
 	docker run --rm -p$(PORT):9080 -p$(SSL_PORT):9443 $(IMAGE)
+#	docker run --rm \
+		-p$(PORT):9080 \
+		-p$(SSL_PORT):9443 \
+		-eGITHUB_APP_ID=${GITHUB_APP_ID} \
+		-eGITHUB_APP_SECRET=${GITHUB_APP_SECRET} \
+		-eAUTH_URL=${AUTH_URL} $(IMAGE) 
 	
 .PHONY: install
 install:
