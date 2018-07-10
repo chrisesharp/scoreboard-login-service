@@ -161,13 +161,14 @@ public class GitHubCallback extends JwtAuth {
                               Boolean primary = Boolean.valueOf(email.getBoolean("primary"));
                               if(primary){
                                 claims.put("email", email.getString("email"));
+                                claims.put("upn", email.getString("email"));
                               }
                             }
                           }
                         }
                         //Set<String> groups = new HashSet<String>();
                         //groups.add("user");
-                        claims.put("groups","user");
+                        claims.put("groups","player");
 
                         String jwt = createJwt(claims);
 

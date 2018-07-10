@@ -9,11 +9,11 @@
       <feature>mpJwt-1.0</feature>
       <feature>jsonp-1.0</feature>
   </featureManager>
-  <!--
-    <keyStore id="defaultKeyStore" location="key.jks"  password="keystore"/>
+
+    <keyStore id="defaultKeyStore" location="key.jks"  password="secret"/>
 
     <keyStore id="defaultTrustStore" location="truststore.jks" password="truststore"/>
--->
+
   <sslDefault sslRef="DefaultSSLSettings"/>
   <ssl id="DefaultSSLSettings"
     keyStoreRef="defaultKeyStore" 

@@ -2,6 +2,7 @@ PORT = 32785
 SSL_PORT = 32444
 IMAGE = login:v1.0.0
 CHART = chart/login
+SECURITY = /opt/ol/wlp/usr/servers/defaultServer/resources/security
 
 all: build docker
 
@@ -36,7 +37,14 @@ run:
 		-eGITHUB_APP_ID=${GITHUB_APP_ID} \
 		-eGITHUB_APP_SECRET=${GITHUB_APP_SECRET} \
 		-eAUTH_URL=${AUTH_URL} $(IMAGE) 
-	
+.PHONY: run-keystore
+run-keystore:
+	docker run --rm \
+	 		-p$(PORT):9080 \
+			-p$(SSL_PORT):9443 \
+			-v keystore:$(SECURITY) \
+			$(IMAGE)
+
 .PHONY: install
 install:
 	helm dependency build $(CHART)
