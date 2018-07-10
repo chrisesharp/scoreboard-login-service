@@ -102,7 +102,9 @@ public abstract class JwtAuth extends HttpServlet {
         onwardsClaims.setSubject(claims.get("id"));
 
         // We'll use this claim to know this is a user token
-        onwardsClaims.setAudience("client");
+        onwardsClaims.setAudience("scoreboard");
+        
+        onwardsClaims.setIssuer("http://openliberty.io");
 
         // we set creation time to 24hrs ago, to avoid timezone issues in the
         // browser
@@ -123,7 +125,7 @@ public abstract class JwtAuth extends HttpServlet {
         // optional, but can be used by the receivers of the jwt to know which
         // key
         // they should verifiy it with.
-        String newJwt = Jwts.builder().setHeaderParam("kid", "playerssl").setClaims(onwardsClaims)
+        String newJwt = Jwts.builder().setHeaderParam("kid", "pacmanssl").setClaims(onwardsClaims)
                 .signWith(SignatureAlgorithm.RS256, signingKey).compact();
 
         return newJwt;

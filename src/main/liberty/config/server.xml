@@ -36,7 +36,7 @@
     password="secret" />
   -->
   <!-- Signed JWT keystore info -->
-    <jndiEntry jndiName="jwtKeyStore" value="${server.output.dir}/resources/security/keystore.jks"/>
+    <jndiEntry jndiName="jwtKeyStore" value="${server.config.dir}/resources/security/keystore.jks"/>
 <!--
     <jndiEntry jndiName="jwtKeyStore" value="${server.config.dir}/resources/security/keystore.jceks"/>
 -->

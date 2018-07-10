@@ -21,7 +21,7 @@ import java.security.GeneralSecurityException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.logging.Level;
+//import java.util.logging.Level;
 import java.io.ByteArrayInputStream;
 
 
@@ -45,9 +45,6 @@ import com.google.api.client.http.HttpResponse;
 import com.google.api.client.http.javanet.NetHttpTransport;
 import application.auth.JwtAuth;
 
-/**
- * Servlet implementation class googleCallback
- */
 @WebServlet("/callback")
 public class GitHubCallback extends JwtAuth {
     private static final long serialVersionUID = 1L;
@@ -79,7 +76,6 @@ public class GitHubCallback extends JwtAuth {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-
         //ok, we have our code.. so the user has agreed to our app being authed.
         String code = request.getParameter("code");
 
@@ -186,10 +182,8 @@ public class GitHubCallback extends JwtAuth {
             }else{
                 response.sendRedirect(callbackFailure);
             }
-
         } catch (GeneralSecurityException e) {
             throw new ServletException(e);
         }
-
     }
 }
