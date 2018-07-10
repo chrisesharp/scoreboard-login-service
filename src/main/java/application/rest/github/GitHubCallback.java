@@ -21,9 +21,10 @@ import java.security.GeneralSecurityException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
+import java.util.HashSet;
 //import java.util.logging.Level;
 import java.io.ByteArrayInputStream;
-
 
 import javax.annotation.PostConstruct;
 import javax.annotation.Resource;
@@ -164,11 +165,14 @@ public class GitHubCallback extends JwtAuth {
                             }
                           }
                         }
+                        //Set<String> groups = new HashSet<String>();
+                        //groups.add("user");
+                        claims.put("groups","user");
 
                         String jwt = createJwt(claims);
 
                         //log for now, we'll clean this up once it's all working =)
-                        System.out.println("New User Authed: " + claims.get("id")+" jwt "+jwt);
+                        System.out.println("New User Authed: " + claims.get("email")+" jwt "+jwt);
                         response.sendRedirect(callbackSuccess + "/" + jwt);
 
                     }else{

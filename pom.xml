@@ -174,7 +174,7 @@
                 </executions>
                 <!-- Global configuration for the keytool plugin -->
                 <configuration>
-                    <keystore>${basedir}/src/main/liberty/config/security/keystore.jks</keystore>
+                    <keystore>${basedir}/src/main/liberty/config/security/key.jks</keystore>
                     <storepass>secret</storepass>
                     <storetype>jks</storetype>
                 </configuration>
@@ -197,7 +197,7 @@
                                 <resource>
                                     <directory>src/main/liberty/config/security/</directory>
                                     <includes>
-                                        <include>keystore.jks</include>
+                                        <include>key.jks</include>
                                     </includes>
                                 </resource>
                             </resources>
