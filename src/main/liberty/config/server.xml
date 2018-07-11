@@ -27,25 +27,17 @@
     keyName="default" 
     audiences="scoreboard" 
     issuer="${jwt.issuer}"/>
-
-  <!-- This is the keystore that will be used by SSL and by JWT.
-       The keystore is built using the maven keytool plugin 
-  <keyStore id="defaultKeyStore" 
-    location="keystore.jceks" 
-    type="JCEKS" 
-    password="secret" />
-  -->
+    
   <!-- Signed JWT keystore info -->
     <jndiEntry jndiName="jwtKeyStore" value="${server.config.dir}/resources/security/key.jks"/>
-<!--
-    <jndiEntry jndiName="jwtKeyStore" value="${server.config.dir}/resources/security/keystore.jceks"/>
--->
     <jndiEntry jndiName="jwtKeyStorePassword" value="secret"/>
     <jndiEntry jndiName="jwtKeyStoreAlias" value="default"/>
   <!-- Github Application Info...  -->
     <jndiEntry jndiName="gitHubOAuthKey" value="${env.GITHUB_APP_ID}"/>
     <jndiEntry jndiName="gitHubOAuthSecret" value="${env.GITHUB_APP_SECRET}"/>
-    <jndiEntry jndiName="authURL" value="${env.AUTH_URL}"/>
+    <jndiEntry jndiName="gitHubAuthCallbackURL" value="${env.GITHUB_AUTH_CALLBACK_URL}"/>
+    
+  <!-- final flow callbacks -->
     <jndiEntry jndiName="authCallbackURLSuccess" value="${env.FRONT_END_SUCCESS_CALLBACK}"/>
     <jndiEntry jndiName="authCallbackURLFailure" value="${env.FRONT_END_FAIL_CALLBACK}"/>
 

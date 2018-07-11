@@ -31,10 +31,10 @@ public class GitHubAuth extends HttpServlet {
 
     @Resource(lookup = "gitHubOAuthKey")
     private String key;
-    @Resource(lookup = "authURL")
-    private String authURL;
+    @Resource(lookup = "gitHubAuthCallbackURL")
+    private String gitHubAuthCallbackURL;
 
-    private final static String url = "https://github.com/login/oauth/authorize";
+    private final static String githubURL = "https://github.com/login/oauth/authorize";
 
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
@@ -44,15 +44,15 @@ public class GitHubAuth extends HttpServlet {
             String state=stateUUID.toString();
             request.getSession().setAttribute("github", state);
 
-            // GitHub will tell the users browser to go to this address once
-            // they are done authing.
-            String callbackURL = authURL + "/callback";
-
-            String newUrl = url + "?client_id="+key+"&redirect_url="+callbackURL+"&scope=user:email&state="+state;
-            System.out.println("GitHub Auth with callback:" + newUrl);
-
-            // send the user to google to be authenticated.
-            response.sendRedirect(newUrl);
+            String githubAuthReqURL = githubURL 
+                    + "?client_id="
+                    + key
+                    + "&redirect_url="
+                    + gitHubAuthCallbackURL
+                    + "&scope=user:email&state="
+                    + state;
+                    
+            response.sendRedirect(githubAuthReqURL);
 
         } catch (Exception e) {
             throw new ServletException(e);

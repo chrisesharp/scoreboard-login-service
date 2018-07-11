@@ -22,7 +22,8 @@ public class CallbackComplete extends HttpServlet {
       if (pathParts.length > 1 && pathParts[1].equals("success")) {
         out.println("<h1>Authentication complete</h1>");
         out.println("Now copy this token into your ENV var...");
-        out.println(pathParts[2]);
+        out.println("<div>export AUTH_TOKEN="+pathParts[2]);
+        out.println("</div>");
       } else {
         out.println("<h1>Authentication failed</h1>");
         out.println("Unlucky!");

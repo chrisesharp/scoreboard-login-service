@@ -21,9 +21,6 @@ import java.security.GeneralSecurityException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.HashSet;
-//import java.util.logging.Level;
 import java.io.ByteArrayInputStream;
 
 import javax.annotation.PostConstruct;
@@ -39,15 +36,16 @@ import javax.json.JsonReader;
 import javax.json.JsonObject;
 import javax.json.JsonArray;
 import javax.json.Json;
+
 import com.google.api.client.http.GenericUrl;
-import com.google.api.client.http.HttpRequest;
 import com.google.api.client.http.HttpRequestFactory;
 import com.google.api.client.http.HttpResponse;
 import com.google.api.client.http.javanet.NetHttpTransport;
-import application.auth.JwtAuth;
 
-@WebServlet("/callback")
-public class GitHubCallback extends JwtAuth {
+import application.auth.JwtIssuerServlet;
+
+@WebServlet("/GitHubAuth/callback")
+public class GitHubCallback extends JwtIssuerServlet {
     private static final long serialVersionUID = 1L;
 
     @Resource(lookup = "gitHubOAuthKey")
@@ -60,8 +58,10 @@ public class GitHubCallback extends JwtAuth {
     @Resource(lookup = "authCallbackURLFailure")
     String callbackFailure;
     
-    @Resource(lookup = "authURL")
-    private String authURL;
+    @Resource(lookup = "gitHubAuthCallbackURL")
+    private String gitHubAuthCallbackURL;
+    
+    private HttpRequestFactory requestFactory;
 
     public GitHubCallback() {
         super();
@@ -77,118 +77,110 @@ public class GitHubCallback extends JwtAuth {
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        //ok, we have our code.. so the user has agreed to our app being authed.
-        String code = request.getParameter("code");
-
+        String githubAuthCode = request.getParameter("code");
         String state = (String) request.getSession().getAttribute("github");
+        Map<String, String> claims;
 
-        //now we need to invoke the access_token endpoint to swap the code for a token.
-        String callbackURL = authURL + "/callback";
-
-        HttpRequestFactory requestFactory;
         try {
-            //we'll ignore the ssl cert of the github server for now..
-            //eventually we may add this to the player truststore..
-            requestFactory = new NetHttpTransport.Builder().doNotValidateCertificate().build().createRequestFactory();
+          requestFactory = new NetHttpTransport.Builder().doNotValidateCertificate().build().createRequestFactory();
 
-            //prepare the request..
-            GenericUrl url = new GenericUrl("https://github.com/login/oauth/access_token");
-            //set the client id & secret from the injected environment.
-            url.put("client_id", key);
-            url.put("client_secret", secret);
-            //add the code we just got given..
-            url.put("code", code);
-            url.put("redirect_uri", callbackURL );
-            url.put("state", state);
+          GenericUrl accessRequestURL = new GenericUrl("https://github.com/login/oauth/access_token");
+          accessRequestURL.put("client_id", key);
+          accessRequestURL.put("client_secret", secret);
+          accessRequestURL.put("code", githubAuthCode);
+          accessRequestURL.put("redirect_uri", gitHubAuthCallbackURL);
+          accessRequestURL.put("state", state);
 
-            //now place the request to github..
-            HttpRequest infoRequest = requestFactory.buildGetRequest(url);
-            HttpResponse httpResponse = infoRequest.execute();
-            String responseString = "failed.";
-            if(httpResponse.isSuccessStatusCode()){
-
-                //http client way to parse query params..
-                //List<NameValuePair> params = URLEncodedUtils.parse(responseString, Charset.forName("UTF-8"));
-                List<NameValuePair> params = URLEncodedUtils.parse(httpResponse.parseAsString(), Charset.forName("UTF-8"));
-                String token = null;
-                for(NameValuePair param : params){
-                    if("access_token".equals(param.getName())){
-                        token = param.getValue();
-                    }
-                }
-
-                if(token!=null){
-                    //great, we have a token, now we can use that to request the user profile..
-                    GenericUrl query = new GenericUrl("https://api.github.com/user");
-                    query.put("access_token", token);
-
-                    HttpRequest userRequest = requestFactory.buildGetRequest(query);
-                    HttpResponse u = userRequest.execute();
-                    if(u.isSuccessStatusCode()){
-                        //user profile comes back as json..
-                        responseString = u.parseAsString();
-
-                        JsonReader jsonReader = Json.createReader(
-                            new ByteArrayInputStream(responseString.getBytes())
-                          );
-                        JsonObject jsonResponse = jsonReader.readObject();
-                        jsonReader.close();
-
-
-                        Map<String, String> claims = new HashMap<String,String>();
-                        claims.put("valid", "true");
-                        //github id is a number, but we'll read it as text incase it changes in future..
-                        claims.put("id", "github:" + jsonResponse.get("id").toString());
-                        claims.put("name", jsonResponse.get("login").toString());
-
-                        GenericUrl emailQuery = new GenericUrl("https://api.github.com/user/emails");
-                        emailQuery.put("access_token", token);
-                        HttpRequest emailRequest = requestFactory.buildGetRequest(emailQuery);
-                        HttpResponse er = emailRequest.execute();
-
-                        claims.put("email","unknown");
-                        if(er.isSuccessStatusCode()){
-                          responseString = er.parseAsString();
-                          jsonReader = Json.createReader(
-                              new ByteArrayInputStream(responseString.getBytes())
-                            );
-                          JsonArray jsonResponseArray = jsonReader.readArray();
-                          jsonReader.close();
-                          if(jsonResponseArray != null){
-                            int arraySize = jsonResponseArray.size();
-                            for ( int i = 0; i < arraySize; i++) {
-                              JsonObject email = jsonResponseArray.getJsonObject(i);
-                              Boolean primary = Boolean.valueOf(email.getBoolean("primary"));
-                              if(primary){
-                                claims.put("email", email.getString("email"));
-                                claims.put("upn", email.getString("email"));
-                              }
-                            }
-                          }
-                        }
-                        //Set<String> groups = new HashSet<String>();
-                        //groups.add("user");
-                        claims.put("groups","player");
-
-                        String jwt = createJwt(claims);
-
-                        //log for now, we'll clean this up once it's all working =)
-                        System.out.println("New User Authed: " + claims.get("email")+" jwt "+jwt);
-                        response.sendRedirect(callbackSuccess + "/" + jwt);
-
-                    }else{
-                        System.out.println(u.getStatusCode());
-                        response.sendRedirect(callbackFailure);
-                    }
-                }else{
-                    System.out.println("did not find token in github response "+responseString);
-                    response.sendRedirect(callbackFailure);
-                }
-            }else{
-                response.sendRedirect(callbackFailure);
-            }
+          HttpResponse githubResponse = requestFactory.buildGetRequest(accessRequestURL).execute();
+          
+          if(githubResponse.isSuccessStatusCode()){
+            String accessToken = getAccessTokenFromResponse(githubResponse);
+            claims = makeClaimsForIdentity(accessToken);
+            response.sendRedirect(createJwtWithClaims(claims));
+          } else {
+            response.sendRedirect(callbackFailure);
+          }
         } catch (GeneralSecurityException e) {
             throw new ServletException(e);
         }
+    }
+    
+    private String getAccessTokenFromResponse(HttpResponse githubResponse) throws IOException {
+      List<NameValuePair> parameters = URLEncodedUtils.parse(githubResponse.parseAsString(), Charset.forName("UTF-8"));
+      String token = null;
+      for(NameValuePair param : parameters){
+          if("access_token".equals(param.getName())){
+              token = param.getValue();
+          }
+      }
+      return token;
+    }
+    
+    private Map<String, String> makeClaimsForIdentity(String token) throws IOException {
+      Map<String, String> claims = null;
+      if(token!=null){
+          HttpResponse userProfile = sendRequestWithToken(token, "https://api.github.com/user");
+          
+          if(userProfile.isSuccessStatusCode()) {
+              JsonObject profile = readJsonObject(userProfile.parseAsString());
+
+              claims = new HashMap<String,String>();
+              claims.put("valid", "true");
+              claims.put("id", "github:" + profile.get("id").toString());
+              claims.put("name", profile.get("login").toString());
+
+              HttpResponse emails = sendRequestWithToken(token, "https://api.github.com/user/emails");
+              
+              if(emails.isSuccessStatusCode()){
+                JsonArray emailArray = readJsonArray(emails.parseAsString());
+                if(emailArray != null){
+                  for (JsonObject email: emailArray.toArray(new JsonObject[0])) {
+                    Boolean primary = Boolean.valueOf(email.getBoolean("primary"));
+                    if (primary) {
+                      claims.put("email", email.getString("email"));
+                      claims.put("upn", email.getString("email"));
+                    }
+                  }
+                } else {
+                  claims.put("email","unknown");
+                }
+              }
+              claims.put("groups","player");
+          }
+      }
+      return claims;
+    }
+
+    private String createJwtWithClaims(Map<String,String> claims) throws IOException {
+      if (claims != null) {
+        String jwt = createJwt(claims);
+        System.out.println("New User Authed: " + claims.get("name"));
+        return (callbackSuccess + "/" + jwt);
+      }
+      return callbackFailure;
+    }
+    
+    private JsonObject readJsonObject(String json) {
+      JsonReader jsonReader = Json.createReader(
+        new ByteArrayInputStream(json.getBytes())
+        );
+      JsonObject object = jsonReader.readObject();
+      jsonReader.close();
+      return object;
+    }
+    
+    private JsonArray readJsonArray(String json) {
+      JsonReader jsonReader = Json.createReader(
+        new ByteArrayInputStream(json.getBytes())
+        );
+      JsonArray array = jsonReader.readArray();
+      jsonReader.close();
+      return array;
+    }
+    
+    private HttpResponse sendRequestWithToken(String token, String url) throws IOException{
+      GenericUrl query = new GenericUrl(url);
+      query.put("access_token", token);
+      return requestFactory.buildGetRequest(query).execute();
     }
 }
