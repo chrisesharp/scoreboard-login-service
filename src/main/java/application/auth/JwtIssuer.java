@@ -19,6 +19,7 @@ import java.io.IOException;
 import java.security.Key;
 
 import java.util.Calendar;
+import java.util.Date;
 import java.util.Map;
 
 import io.jsonwebtoken.Claims;
@@ -32,26 +33,20 @@ public class JwtIssuer {
         Claims onwardsClaims = Jwts.claims();
         onwardsClaims.putAll(claims);
         onwardsClaims.setSubject(claims.get("id"));
-
-        // We'll use this claim to know this is a user token
         onwardsClaims.setAudience("scoreboard");
-        
         onwardsClaims.setIssuer("http://openliberty.io");
-
-        // we set creation time to 24hrs ago, to avoid timezone issues in the
-        // browser verification of the jwt.
-        Calendar calendar1 = Calendar.getInstance();
-        calendar1.add(Calendar.HOUR, -24);
-        onwardsClaims.setIssuedAt(calendar1.getTime());
-
-        // client JWT has 24 hrs validity from now.
-        Calendar calendar2 = Calendar.getInstance();
-        calendar2.add(Calendar.HOUR, 24);
-        onwardsClaims.setExpiration(calendar2.getTime());
+        onwardsClaims.setIssuedAt(getTimeRelativeToNow(-24));
+        onwardsClaims.setExpiration(getTimeRelativeToNow(24));
 
         return Jwts.builder()
                 .setClaims(onwardsClaims)
                 .signWith(SignatureAlgorithm.RS256, signingKey)
                 .compact();
+    }
+    
+    private static Date getTimeRelativeToNow(int hours) {
+      Calendar calendar = Calendar.getInstance();
+      calendar.add(Calendar.HOUR, hours);
+      return calendar.getTime();
     }
 }
