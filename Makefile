@@ -18,14 +18,14 @@ build:
 docker:
 	docker build -t $(IMAGE) .
 
-.PHONY: verify
-verify:
+.PHONY: test
+test:
 	mvn verify
 
 .PHONY: coverage
 coverage:
 	mvn com.gavinmogan:codacy-maven-plugin:coverage \
-		-DcoverageReportFile=target/site/jacoco/jacoco.xml \
+		-DcoverageReportFile=target/site/jacoco-ut/jacoco.xml \
 		-DprojectToken=$(CODACY_PROJECT_TOKEN) -DapiToken=$(CODACY_API_TOKEN)
 
 .PHONY: run
