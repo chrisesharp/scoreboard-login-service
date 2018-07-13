@@ -36,7 +36,7 @@ run:
 		-p$(SSL_PORT):9443 \
 		-eGITHUB_APP_ID=${GITHUB_APP_ID} \
 		-eGITHUB_APP_SECRET=${GITHUB_APP_SECRET} \
-		-eAUTH_URL=${AUTH_URL} $(IMAGE) 
+		-eGITHUB_AUTH_CALLBACK_URL=${GITHUB_AUTH_CALLBACK_URL} $(IMAGE) 
 .PHONY: run-keystore
 run-keystore:
 	docker run --rm \
