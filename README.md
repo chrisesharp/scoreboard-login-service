@@ -1,6 +1,11 @@
 
 # Scoreboard Authentication Service
 
+## Using the service
+
+When running, point your browser to http://localhost:32785/ to authenticate with 
+GitHub and follow the instructions.
+
 ## Build
 
 Perform a Maven and Docker build with:
