@@ -24,6 +24,7 @@ test:
 
 .PHONY: coverage
 coverage:
+	mvn clean org.jacoco:jacoco-maven-plugin:prepare-agent package
 	mvn com.gavinmogan:codacy-maven-plugin:coverage \
 		-DcoverageReportFile=target/site/jacoco-ut/jacoco.xml \
 		-DprojectToken=$(CODACY_PROJECT_TOKEN) -DapiToken=$(CODACY_API_TOKEN)
