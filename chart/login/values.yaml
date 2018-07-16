@@ -34,3 +34,11 @@ base:
 istio:
   enabled: false
   weight: 100
+auth:
+  github:
+    callback: http://localhost:32785/GitHubAuth/callback
+  frontend: 
+    success: http://localhost:32785/callback/success
+    failure: http://localhost:32785/callback/failure
+  
+  

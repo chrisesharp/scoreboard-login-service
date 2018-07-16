@@ -34,33 +34,25 @@ spec:
             value: "{{ .Values.service.servicePort }}"
           - name: APPLICATION_NAME
             value: "{{ .Release.Name }}"
-          - name: IBM_APM_SERVER_URL
+          - name: GITHUB_AUTH_CALLBACK_URL
+            value: "{{ .Values.auth.github.callback }}"
+          - name: FRONT_END_SUCCESS_CALLBACK
+            value: "{{ .Values.auth.frontend.success }}"
+          - name: FRONT_END_FAIL_CALLBACK
+            value: "{{ .Values.auth.frontend.failure }}"
+          - name: GITHUB_APP_ID
             valueFrom:
               secretKeyRef:
-                name: apm-server-config
-                key: ibm_apm_server_url
-                optional: true
-          - name: IBM_APM_KEYFILE
+                name: githuboauth
+                key: GITHUB_APP_ID
+                optional: false
+          - name: GITHUB_APP_SECRET
             valueFrom:
               secretKeyRef:
-                name: apm-server-config
-                key: ibm_apm_keyfile
-                optional: true
-          - name: IBM_APM_KEYFILE_PASSWORD
-            valueFrom:
-              secretKeyRef:
-                name: apm-server-config
-                key: ibm_apm_keyfile_password
-                optional: true
-          - name: IBM_APM_INGRESS_URL
-            valueFrom:
-              secretKeyRef:
-                name: apm-server-config
-                key: ibm_apm_ingress_url
-                optional: true
-          - name: IBM_APM_ACCESS_TOKEN
-            valueFrom:
-              secretKeyRef:
-                name: apm-server-config
-                key: ibm_apm_access_token
-                optional: true
+                name: githuboauth
+                key: GITHUB_APP_SECRET
+                optional: false
+      volumes:
+      - name: keystore-pv
+        persistentVolumeClaim:
+          claimName: keystore-pv-claim
