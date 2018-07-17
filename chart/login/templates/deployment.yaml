@@ -52,6 +52,9 @@ spec:
                 name: githuboauth
                 key: GITHUB_APP_SECRET
                 optional: false
+        volumeMounts:
+        - mountPath: {{ .Values.keystore.mountPath }}
+          name: keystore-pv
       volumes:
       - name: keystore-pv
         persistentVolumeClaim:

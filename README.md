@@ -3,7 +3,7 @@
 
 ## Using the service
 
-When running, point your browser to http://localhost:32785/ to authenticate with 
+When running, point your browser to http://localhost:32001/ to authenticate with 
 GitHub and follow the instructions.
 
 ## Secrets Needed
@@ -45,6 +45,15 @@ https://github.com/chrisesharp/shared-keystore
 Run under Kubernetes in Docker for Mac with Helm installed:
 ```
 make install
+```
+This will mount the keystore persistent volume in kubernetes you will need to have deployed using:
+https://github.com/chrisesharp/shared-keystore 
+
+## Remove
+
+To remove the service from your kubernetes, run:
+```
+make remove
 ```
 
 ## Clean Up

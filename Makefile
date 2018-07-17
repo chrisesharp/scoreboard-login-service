@@ -1,15 +1,16 @@
 ifdef SECRETS
 	include $(SECRETS)
 endif
-PORT = 32785
+SERVICE=login
+PORT = 32001
 SSL_PORT = 32444
-IMAGE = login:v1.0.0
-CHART = chart/login
+IMAGE = $(SERVICE):v1.0.0
+CHART = chart/$(SERVICE)
 SECURITY = /opt/ol/wlp/usr/servers/defaultServer/resources/security
 
-GITHUB_AUTH_CALLBACK_URL = http://localhost:32785/GitHubAuth/callback
-FRONT_END_SUCCESS_CALLBACK = http://localhost:32785/callback/success
-FRONT_END_FAIL_CALLBACK = http://localhost:32785/callback/failure
+GITHUB_AUTH_CALLBACK_URL = http://localhost:32001/GitHubAuth/callback
+FRONT_END_SUCCESS_CALLBACK = http://localhost:32001/callback/success
+FRONT_END_FAIL_CALLBACK = http://localhost:32001/callback/failure
 
 
 all: build docker
@@ -66,4 +67,8 @@ run-keystore:
 install:
 	./inject-secrets.sh
 	helm dependency build $(CHART)
-	helm upgrade --wait --install login $(CHART)
+	helm upgrade --wait --install $(SERVICE) $(CHART)
+	
+.PHONY: remove
+remove:
+	helm delete --purge $(SERVICE)

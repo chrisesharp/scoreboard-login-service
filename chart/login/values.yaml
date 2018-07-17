@@ -13,6 +13,8 @@ image:
 service:
   name: Node
   type: NodePort
+  nodePort: 32001
+  nodePortHttps: 32444
   servicePort: 9080
   servicePortHttps: 9443
 hpa:
@@ -30,9 +32,11 @@ istio:
   weight: 100
 auth:
   github:
-    callback: http://localhost:32785/GitHubAuth/callback
+    callback: http://localhost:32001/GitHubAuth/callback
   frontend: 
-    success: http://localhost:32785/callback/success
-    failure: http://localhost:32785/callback/failure
+    success: http://localhost:32001/callback/success
+    failure: http://localhost:32001/callback/failure
+keystore:
+  mountPath: /opt/ol/wlp/usr/servers/defaultServer/resources/security
   
   
