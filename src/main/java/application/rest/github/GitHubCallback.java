@@ -23,8 +23,9 @@ import java.util.List;
 import java.util.Map;
 import java.io.ByteArrayInputStream;
 
+import javax.inject.Inject;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 import javax.annotation.PostConstruct;
-import javax.annotation.Resource;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServletRequest;
@@ -48,17 +49,24 @@ import application.auth.JwtIssuerServlet;
 public class GitHubCallback extends JwtIssuerServlet {
     private static final long serialVersionUID = 1L;
 
-    @Resource(lookup = "gitHubOAuthKey")
+    @Inject
+    @ConfigProperty(name="GITHUB_APP_ID")
     private String key;
-    @Resource(lookup = "gitHubOAuthSecret")
+    
+    @Inject
+    @ConfigProperty(name="GITHUB_APP_SECRET")
     private String secret;
     
-    @Resource(lookup = "authCallbackURLSuccess")
+    @Inject
+    @ConfigProperty(name="FRONT_END_SUCCESS_CALLBACK")
     String callbackSuccess;
-    @Resource(lookup = "authCallbackURLFailure")
+    
+    @Inject
+    @ConfigProperty(name="FRONT_END_FAIL_CALLBACK")
     String callbackFailure;
     
-    @Resource(lookup = "gitHubAuthCallbackURL")
+    @Inject
+    @ConfigProperty(name="GITHUB_AUTH_CALLBACK_URL")
     private String gitHubAuthCallbackURL;
     
     private HttpRequestFactory requestFactory;

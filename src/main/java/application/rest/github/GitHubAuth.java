@@ -18,7 +18,8 @@ package application.rest.github;
 import java.io.IOException;
 import java.util.UUID;
 
-import javax.annotation.Resource;
+import javax.inject.Inject;
+import org.eclipse.microprofile.config.inject.ConfigProperty;
 import javax.servlet.ServletException;
 import javax.servlet.annotation.WebServlet;
 import javax.servlet.http.HttpServlet;
@@ -29,9 +30,12 @@ import javax.servlet.http.HttpServletResponse;
 public class GitHubAuth extends HttpServlet {
     private static final long serialVersionUID = 1L;
 
-    @Resource(lookup = "gitHubOAuthKey")
+    @Inject
+    @ConfigProperty(name="GITHUB_APP_ID")
     private String key;
-    @Resource(lookup = "gitHubAuthCallbackURL")
+
+    @Inject
+    @ConfigProperty(name="GITHUB_AUTH_CALLBACK_URL")
     private String gitHubAuthCallbackURL;
 
     private final static String githubURL = "https://github.com/login/oauth/authorize";

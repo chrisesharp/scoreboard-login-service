@@ -10,41 +10,41 @@
       <feature>jsonp-1.0</feature>
   </featureManager>
 
-    <keyStore id="defaultKeyStore" location="key.jks"  password="secret"/>
-
-    <keyStore id="defaultTrustStore" location="truststore.jks" password="truststore"/>
-
   <sslDefault sslRef="DefaultSSLSettings"/>
   <ssl id="DefaultSSLSettings"
     keyStoreRef="defaultKeyStore" 
     trustStoreRef="defaultTrustStore"/>
   
-  <httpEndpoint httpPort="${default.http.port}" httpsPort="${default.https.port}"
-      id="defaultHttpEndpoint" host="*" />
+  <httpEndpoint id="defaultHttpEndpoint" 
+    host="*"
+    httpPort="${default.http.port}"
+    httpsPort="${default.https.port}" />
       
     <!-- The MP JWT configuration that injects the caller's JWT into a ResourceScoped bean for inspection. -->
   <mpJwt id="jwtUserConsumer" 
     keyName="default" 
     audiences="scoreboard" 
     issuer="${jwt.issuer}"/>
+  
+  <keyStore id="defaultKeyStore" 
+    location="key.jks"  
+    password="secret"/>
+
+  <keyStore id="defaultTrustStore" 
+    location="truststore.jks" 
+    password="truststore"/>
     
   <!-- Signed JWT keystore info -->
     <jndiEntry jndiName="jwtKeyStore" value="${server.config.dir}/resources/security/key.jks"/>
     <jndiEntry jndiName="jwtKeyStorePassword" value="secret"/>
     <jndiEntry jndiName="jwtKeyStoreAlias" value="default"/>
-  <!-- Github Application Info...  -->
-    <jndiEntry jndiName="gitHubOAuthKey" value="${env.GITHUB_APP_ID}"/>
-    <jndiEntry jndiName="gitHubOAuthSecret" value="${env.GITHUB_APP_SECRET}"/>
-    <jndiEntry jndiName="gitHubAuthCallbackURL" value="${env.GITHUB_AUTH_CALLBACK_URL}"/>
-    
-  <!-- final flow callbacks -->
-    <jndiEntry jndiName="authCallbackURLSuccess" value="${env.FRONT_END_SUCCESS_CALLBACK}"/>
-    <jndiEntry jndiName="authCallbackURLFailure" value="${env.FRONT_END_FAIL_CALLBACK}"/>
-
 
   <!-- Automatically expand WAR files and EAR files -->
   <applicationManager autoExpand="true"/>
 
-  <webApplication name="login" location="${app.location}"/>
+  <webApplication 
+    name="login" 
+    contextRoot="/" 
+    location="${app.location}"/>
 
 </server>
