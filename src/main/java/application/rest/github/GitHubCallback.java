@@ -88,18 +88,17 @@ public class GitHubCallback extends JwtIssuerServlet {
         String githubAuthCode = request.getParameter("code");
         String state = (String) request.getSession().getAttribute("github");
         Map<String, String> claims;
+        GenericUrl accessRequestURL = buildAccessRequestUrl(githubAuthCode, state);
 
         try {
-          requestFactory = new NetHttpTransport.Builder().doNotValidateCertificate().build().createRequestFactory();
+          requestFactory = new NetHttpTransport.Builder()
+                                              .doNotValidateCertificate()
+                                              .build()
+                                              .createRequestFactory();
 
-          GenericUrl accessRequestURL = new GenericUrl("https://github.com/login/oauth/access_token");
-          accessRequestURL.put("client_id", key);
-          accessRequestURL.put("client_secret", secret);
-          accessRequestURL.put("code", githubAuthCode);
-          accessRequestURL.put("redirect_uri", gitHubAuthCallbackURL);
-          accessRequestURL.put("state", state);
-
-          HttpResponse githubResponse = requestFactory.buildGetRequest(accessRequestURL).execute();
+          HttpResponse githubResponse = requestFactory
+                                        .buildGetRequest(accessRequestURL)
+                                        .execute();
           
           if(githubResponse.isSuccessStatusCode()){
             String accessToken = getAccessTokenFromResponse(githubResponse);
@@ -111,6 +110,16 @@ public class GitHubCallback extends JwtIssuerServlet {
         } catch (GeneralSecurityException e) {
             throw new ServletException(e);
         }
+    }
+    
+    private GenericUrl buildAccessRequestUrl(String githubAuthCode, String state) {
+      GenericUrl accessRequestURL = new GenericUrl("https://github.com/login/oauth/access_token");
+      accessRequestURL.put("client_id", key);
+      accessRequestURL.put("client_secret", secret);
+      accessRequestURL.put("code", githubAuthCode);
+      accessRequestURL.put("redirect_uri", gitHubAuthCallbackURL);
+      accessRequestURL.put("state", state);
+      return accessRequestURL;
     }
     
     private String getAccessTokenFromResponse(HttpResponse githubResponse) throws IOException {
