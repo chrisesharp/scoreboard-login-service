@@ -84,32 +84,35 @@ public class GitHubCallback extends JwtIssuerServlet {
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
-            throws ServletException, IOException {
-        String githubAuthCode = request.getParameter("code");
-        String state = (String) request.getSession().getAttribute("github");
-        Map<String, String> claims;
-        GenericUrl accessRequestURL = buildAccessRequestUrl(githubAuthCode, state);
+          throws ServletException, IOException {
+      String githubAuthCode = request.getParameter("code");
+      String state = (String) request.getSession().getAttribute("github");
+      Map<String, String> claims;
+      HttpResponse githubResponse = makeAccessRequest(githubAuthCode, state);
+      
+      if(githubResponse.isSuccessStatusCode()){
+        String accessToken = getAccessTokenFromResponse(githubResponse);
+        claims = makeClaimsForIdentity(accessToken);
+        response.sendRedirect(createJwtWithClaims(claims));
+      } else {
+        response.sendRedirect(callbackFailure);
+      }
+    }
+    
+    private HttpResponse makeAccessRequest(String githubAuthCode, String state)
+      throws ServletException, IOException {
+      GenericUrl accessRequestURL = buildAccessRequestUrl(githubAuthCode, state);
+      try {
+        requestFactory = new NetHttpTransport.Builder()
+                                            .doNotValidateCertificate()
+                                            .build()
+                                            .createRequestFactory();
 
-        try {
-          requestFactory = new NetHttpTransport.Builder()
-                                              .doNotValidateCertificate()
-                                              .build()
-                                              .createRequestFactory();
-
-          HttpResponse githubResponse = requestFactory
-                                        .buildGetRequest(accessRequestURL)
+         return requestFactory.buildGetRequest(accessRequestURL)
                                         .execute();
-          
-          if(githubResponse.isSuccessStatusCode()){
-            String accessToken = getAccessTokenFromResponse(githubResponse);
-            claims = makeClaimsForIdentity(accessToken);
-            response.sendRedirect(createJwtWithClaims(claims));
-          } else {
-            response.sendRedirect(callbackFailure);
-          }
-        } catch (GeneralSecurityException e) {
-            throw new ServletException(e);
-        }
+      } catch (GeneralSecurityException e) {
+        throw new ServletException(e);
+      }
     }
     
     private GenericUrl buildAccessRequestUrl(String githubAuthCode, String state) {
